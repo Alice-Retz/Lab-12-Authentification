@@ -5,6 +5,7 @@ const { execSync } = require('child_process');
 const fakeRequest = require('supertest');
 const app = require('../lib/app');
 const client = require('../lib/client');
+const toDoData = require('../data/to-dos.js');
 
 describe('app routes', () => {
   describe('routes', () => {
@@ -28,35 +29,61 @@ describe('app routes', () => {
       return client.end(done);
     });
 
-    test('returns animals', async() => {
+    test('GET returns toDos', async ()=> {
 
-      const expectation = [
-        {
-          'id': 1,
-          'name': 'bessie',
-          'cool_factor': 3,
-          'owner_id': 1
-        },
-        {
-          'id': 2,
-          'name': 'jumpy',
-          'cool_factor': 4,
-          'owner_id': 1
-        },
-        {
-          'id': 3,
-          'name': 'spot',
-          'cool_factor': 10,
-          'owner_id': 1
-        }
-      ];
+      const expectation = toDoData.map(to_do_list => to_do_list.todo);
+      const expectedShape =   {
+        id: 1,
+        todo: 'wires',
+        completed: false,
+        user_id: 1
+      };
 
       const data = await fakeRequest(app)
-        .get('/animals')
+        .get('/to-dos')
         .expect('Content-Type', /json/)
         .expect(200);
 
-      expect(data.body).toEqual(expectation);
+      const to_do_results = data.body.map(to_do_list => to_do_list.todo);
+      
+      expect(to_do_results).toEqual(expectation);
+      expect(to_do_results.length).toEqual(toDoData.length);
+      expect(data.body[0]).toEqual(expectedShape);
+    }, 10000);
+
+    test('POST should create a new task', async () => {
+
+      const newTask = {
+        todo: 'download',
+        completed: false,
+        user_id: 1
+      };
+
+      const data = await fakeRequest(app)
+        .post('/to-dos')
+        .send(newTask)
+        .expect(200)
+        .expect('Content-Type', /json/);
+      
+      expect(data.body.todo).toEqual(newTask.todo);
+      expect(data.body.id).toBeGreaterThan(0);
+    });
+
+    test('PUT updates todo to completed', async () => {
+
+      const updatedData = {
+        todo: 'wires',
+        completed: true,
+        user_id: 1
+      };
+      
+      const data = await fakeRequest(app)
+        .put('/to-dos/1')
+        .send(updatedData);
+        // .expect(200)
+        // .expect('Content-Type', /json/);
+
+      expect(data.body.completed).toEqual(updatedData.completed);
     });
   });
 });
