@@ -41,6 +41,7 @@ describe('app routes', () => {
 
       const data = await fakeRequest(app)
         .get('/to-dos')
+        .set('Authorization', token)
         .expect('Content-Type', /json/)
         .expect(200);
 
@@ -61,6 +62,7 @@ describe('app routes', () => {
 
       const data = await fakeRequest(app)
         .post('/to-dos')
+        .set('Authorization', token)
         .send(newTask)
         .expect(200)
         .expect('Content-Type', /json/);
@@ -79,9 +81,10 @@ describe('app routes', () => {
       
       const data = await fakeRequest(app)
         .put('/to-dos/1')
-        .send(updatedData);
-        // .expect(200)
-        // .expect('Content-Type', /json/);
+        .set('Authorization', token)
+        .send(updatedData)
+        .expect(200)
+        .expect('Content-Type', /json/);
 
       expect(data.body.completed).toEqual(updatedData.completed);
     });
