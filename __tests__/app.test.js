@@ -18,7 +18,7 @@ describe('app routes', () => {
       const signInData = await fakeRequest(app)
         .post('/auth/signup')
         .send({
-          email: 'jon@user.com',
+          email: 'john2@arbuckle.com',
           password: '1234'
         });
       
@@ -29,29 +29,6 @@ describe('app routes', () => {
       return client.end(done);
     });
 
-    test('GET returns toDos', async ()=> {
-
-      const expectation = toDoData.map(to_do_list => to_do_list.todo);
-      const expectedShape =   {
-        id: 1,
-        todo: 'wires',
-        completed: false,
-        user_id: 1
-      };
-
-      const data = await fakeRequest(app)
-        .get('/to-dos')
-        .set('Authorization', token)
-        .expect('Content-Type', /json/)
-        .expect(200);
-
-      const to_do_results = data.body.map(to_do_list => to_do_list.todo);
-      
-      expect(to_do_results).toEqual(expectation);
-      expect(to_do_results.length).toEqual(toDoData.length);
-      expect(data.body[0]).toEqual(expectedShape);
-    }, 10000);
-
     test('POST should create a new task', async () => {
 
       const newTask = {
@@ -61,7 +38,7 @@ describe('app routes', () => {
       };
 
       const data = await fakeRequest(app)
-        .post('/to-dos')
+        .post('/api/to-dos')
         .set('Authorization', token)
         .send(newTask)
         .expect(200)
@@ -70,6 +47,29 @@ describe('app routes', () => {
       expect(data.body.todo).toEqual(newTask.todo);
       expect(data.body.id).toBeGreaterThan(0);
     });
+
+    test('GET returns toDos', async ()=> {
+
+      const expectation = ['download'];
+      const expectedShape =   {
+        id: 4,
+        todo: 'download',
+        completed: false,
+        user_id: 2
+      };
+
+      const data = await fakeRequest(app)
+        .get('/api/to-dos')
+        .set('Authorization', token)
+        .expect('Content-Type', /json/)
+        .expect(200);
+
+      const to_do_results = data.body.map(to_do_list => to_do_list.todo);
+      
+      expect(to_do_results).toEqual(expectation);
+      expect(data.body[0]).toEqual(expectedShape);
+    }, 10000);
+
 
     test('PUT updates todo to completed', async () => {
 
@@ -80,7 +80,7 @@ describe('app routes', () => {
       };
       
       const data = await fakeRequest(app)
-        .put('/to-dos/1')
+        .put('/api/to-dos/1')
         .set('Authorization', token)
         .send(updatedData)
         .expect(200)
