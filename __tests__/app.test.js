@@ -5,6 +5,7 @@ const { execSync } = require('child_process');
 const fakeRequest = require('supertest');
 const app = require('../lib/app');
 const client = require('../lib/client');
+const toDoData = require('../data/to-dos.js');
 
 describe('app routes', () => {
   describe('routes', () => {
